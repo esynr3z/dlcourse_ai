@@ -1,3 +1,6 @@
+import numpy as np
+
+
 def binary_classification_metrics(prediction, ground_truth):
     '''
     Computes metrics for binary classification
@@ -9,16 +12,24 @@ def binary_classification_metrics(prediction, ground_truth):
     Returns:
     precision, recall, f1, accuracy - classification metrics
     '''
-    precision = 0
-    recall = 0
-    accuracy = 0
-    f1 = 0
+
+    num_samples = prediction.shape[0]
 
     # TODO: implement metrics!
     # Some helpful links:
     # https://en.wikipedia.org/wiki/Precision_and_recall
     # https://en.wikipedia.org/wiki/F1_score
-    
+
+    tp = np.sum(prediction & ground_truth)
+    tn = np.sum((~prediction) & (~ground_truth))
+    fp = np.sum(prediction & (~ground_truth))
+    fn = np.sum((~prediction) & ground_truth)
+
+    accuracy = (tp + tn) / num_samples
+    recall = tp / (tp + fn)
+    precision = tp / (tp + fp)
+    f1 = 2 * precision * recall / (precision + recall)
+
     return precision, recall, f1, accuracy
 
 
