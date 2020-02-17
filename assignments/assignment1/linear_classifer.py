@@ -15,7 +15,13 @@ def softmax(predictions):
     '''
     # TODO implement softmax
     # Your final implementation shouldn't have any loops
-    raise Exception("Not implemented!")
+    predictions -= np.max(predictions)
+    if (predictions.ndim == 1):
+        prob = np.exp(predictions) / np.sum(np.exp(predictions))
+    else:  # for batches
+        prob = np.exp(predictions) / np.sum(np.exp(predictions), -1)[:, None]
+
+    return prob
 
 
 def cross_entropy_loss(probs, target_index):
