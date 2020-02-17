@@ -39,7 +39,17 @@ def cross_entropy_loss(probs, target_index):
     '''
     # TODO implement cross-entropy
     # Your final implementation shouldn't have any loops
-    raise Exception("Not implemented!")
+    batch_size = target_index.size
+    class_num = probs.shape[-1]
+    gt_probs = np.zeros((batch_size, class_num))
+    gt_probs[np.arange(batch_size), target_index] = 1
+
+    if (probs.ndim == 1):
+        loss = -np.mean(gt_probs * np.log(probs) + (1 - gt_probs) * np.log(1 - probs))
+    else:  # for batches
+        loss = np.mean(-np.mean(gt_probs * np.log(probs) + (1 - gt_probs) * np.log(1 - probs), -1))
+
+    return loss
 
 
 def softmax_with_cross_entropy(predictions, target_index):
