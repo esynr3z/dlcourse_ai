@@ -15,11 +15,13 @@ def softmax(predictions):
     '''
     # TODO implement softmax
     # Your final implementation shouldn't have any loops
-    predictions -= np.max(predictions)
+
     if (predictions.ndim == 1):
-        prob = np.exp(predictions) / np.sum(np.exp(predictions))
+        predictions_stab = predictions - np.max(predictions)
+        prob = np.exp(predictions_stab) / np.sum(np.exp(predictions_stab))
     else:  # for batches
-        prob = np.exp(predictions) / np.sum(np.exp(predictions), -1)[:, None]
+        predictions_stab = predictions - np.max(predictions, -1)[:, None]
+        prob = np.exp(predictions_stab) / np.sum(np.exp(predictions_stab), -1)[:, None]
 
     return prob
 
@@ -39,15 +41,10 @@ def cross_entropy_loss(probs, target_index):
     '''
     # TODO implement cross-entropy
     # Your final implementation shouldn't have any loops
-    batch_size = target_index.size
-    class_num = probs.shape[-1]
-    gt_probs = np.zeros((batch_size, class_num))
-    gt_probs[np.arange(batch_size), target_index] = 1
-
     if (probs.ndim == 1):
-        loss = -np.mean(gt_probs * np.log(probs) + (1 - gt_probs) * np.log(1 - probs))
+        loss = -np.log(probs[target_index][0])
     else:  # for batches
-        loss = np.mean(-np.mean(gt_probs * np.log(probs) + (1 - gt_probs) * np.log(1 - probs), -1))
+        loss = np.mean(-np.log(probs[np.arange(probs.shape[0]), target_index]))
 
     return loss
 
@@ -69,9 +66,20 @@ def softmax_with_cross_entropy(predictions, target_index):
     '''
     # TODO implement softmax with cross-entropy
     # Your final implementation shouldn't have any loops
-    raise Exception("Not implemented!")
+    if (predictions.ndim == 1):
+        batch_size = 1
+    else:
+        batch_size = predictions.shape[0]
+    probs = softmax(predictions)
+    loss = cross_entropy_loss(probs, target_index)
+    grad = probs.copy()
+    if (grad.ndim == 1):
+        grad[target_index] -= 1
+    else:  # for batches
+        grad[np.arange(batch_size), target_index] -= 1
+    grad = grad / batch_size
 
-    return loss, dprediction
+    return loss, grad
 
 
 def l2_regularization(W, reg_strength):
