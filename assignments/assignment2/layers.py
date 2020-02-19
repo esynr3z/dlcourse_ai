@@ -121,6 +121,7 @@ class Param:
 class ReLULayer:
     def __init__(self):
         self.fwd_neg_mask = None
+        self.id = "RELU"
 
     def forward(self, X):
         # TODO: Implement forward pass
@@ -159,12 +160,22 @@ class ReLULayer:
         # ReLU Doesn't have any parameters
         return {}
 
+    def params_grad_clear(self):
+        # ReLU Doesn't have any parameters
+        pass
+
+    def params_l2_reg(self, reg):
+        # ReLU Doesn't have any parameters
+        return 0.0
+
+
 
 class FullyConnectedLayer:
     def __init__(self, n_input, n_output):
         self.W = Param(0.001 * np.random.randn(n_input, n_output))
         self.B = Param(0.001 * np.random.randn(1, n_output))
         self.X = None
+        self.id = "FC"
 
     def forward(self, X):
         # TODO: Implement forward pass
@@ -220,3 +231,16 @@ class FullyConnectedLayer:
     def params_grad_clear(self):
         self.W.grad_clear()
         self.B.grad_clear()
+
+    def params_l2_reg(self, reg):
+        l2_loss = 0.0
+
+        loss, grad = l2_regularization(self.W.value, reg)
+        l2_loss += loss
+        self.W.grad += grad
+
+        loss, grad = l2_regularization(self.B.value, reg)
+        l2_loss += loss
+        self.B.grad += grad
+
+        return l2_loss
