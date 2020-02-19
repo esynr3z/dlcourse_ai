@@ -111,7 +111,11 @@ class Param:
 
     def __init__(self, value):
         self.value = value
-        self.grad = np.zeros_like(value)
+        self.grad = None
+        self.grad_clear()
+
+    def grad_clear(self):
+        self.grad = np.zeros_like(self.value)
 
 
 class ReLULayer:
@@ -165,7 +169,14 @@ class FullyConnectedLayer:
     def forward(self, X):
         # TODO: Implement forward pass
         # Your final implementation shouldn't have any loops
-        raise Exception("Not implemented!")
+        self.X = X.copy()
+        # Move B array inside W and expand X
+        X_expanded = np.hstack([X, np.ones((X.shape[0], 1))])
+        W_expanded = np.vstack([self.W.value, self.B.value])
+
+        l_result = np.dot(X_expanded, W_expanded)
+
+        return l_result
 
     def backward(self, d_out):
         """
@@ -189,9 +200,23 @@ class FullyConnectedLayer:
         # It should be pretty similar to linear classifier from
         # the previous assignment
 
-        raise Exception("Not implemented!")
+        # Move B array inside W and expand X
+        X_expanded = np.hstack([self.X, np.ones((self.X.shape[0], 1))])
+        W_expanded = np.vstack([self.W.value, self.B.value])
+
+        # Calculate W and B gradients
+        W_expanded_grad = np.dot(X_expanded.T, d_out)
+        [self.W.grad, self.B.grad] = np.vsplit(W_expanded_grad, (self.W.value.shape[0],))
+
+        # Calculate X gradients
+        X_expanded_grad = np.dot(d_out, W_expanded.T)
+        d_input = np.hsplit(X_expanded_grad, (self.X.shape[-1],))[0]
 
         return d_input
 
     def params(self):
         return {'W': self.W, 'B': self.B}
+
+    def params_grad_clear(self):
+        self.W.grad_clear()
+        self.B.grad_clear()
