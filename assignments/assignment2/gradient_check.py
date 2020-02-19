@@ -30,7 +30,11 @@ def check_gradient(f, x, delta=1e-5, tol=1e-4):
         numeric_grad_at_ix = 0
 
         # TODO Copy from previous assignment
-        raise Exception("Not implemented!")
+        x_pd = x.copy()
+        x_pd[ix] += delta
+        x_md = x.copy()
+        x_md[ix] -= delta
+        numeric_grad_at_ix = (f(x_pd)[0] - f(x_md)[0]) / (2 * delta)
 
         if not np.isclose(numeric_grad_at_ix, analytic_grad_at_ix, tol):
             print("Gradients are different at %s. Analytic: %2.5f, Numeric: %2.5f" % (
@@ -56,7 +60,9 @@ def check_layer_gradient(layer, x, delta=1e-5, tol=1e-4):
     Returns:
       bool indicating whether gradients match or not
     """
+    orig_x = x.copy()
     output = layer.forward(x)
+    assert np.all(np.isclose(orig_x, x, tol)), "Functions shouldn't modify input variables"
     output_weight = np.random.randn(*output.shape)
 
     def helper_func(x):
