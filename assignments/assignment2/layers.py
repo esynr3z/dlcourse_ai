@@ -120,19 +120,16 @@ class Param:
 
 class ReLULayer:
     def __init__(self):
-        self.fwd_neg_mask = None
+        self.X = None
         self.id = "RELU"
 
     def forward(self, X):
-        # TODO: Implement forward pass
+        # TODO_: Implement forward pass
         # Hint: you'll need to save some information about X
         # to use it later in the backward pass
-        self.fwd_neg_mask = X < 0.0
-
-        l_result = X.copy()
-        l_result[self.fwd_neg_mask] = 0.0
-
-        return l_result
+        result = np.maximum(X, 0)
+        self.X = X
+        return result
 
     def backward(self, d_out):
         """
@@ -146,15 +143,10 @@ class ReLULayer:
         d_result: np array (batch_size, num_features) - gradient
           with respect to input
         """
-        # TODO: Implement backward pass
+        # TODO_: Implement backward pass
         # Your final implementation shouldn't have any loops
-        batch_size = d_out.shape[0]
-
-        d_result = d_out.copy()
-        d_result[self.fwd_neg_mask] = 0.0
-        d_result[self.fwd_neg_mask] /= batch_size
-
-        return d_result
+        d_X = (self.X > 0) * d_out
+        return d_X
 
     def params(self):
         # ReLU Doesn't have any parameters
@@ -167,7 +159,6 @@ class ReLULayer:
     def params_l2_reg(self, reg):
         # ReLU Doesn't have any parameters
         return 0.0
-
 
 
 class FullyConnectedLayer:
@@ -209,8 +200,8 @@ class FullyConnectedLayer:
         # the previous assignment
 
         # Calculate W and B gradients
-        self.W.grad = np.dot(self.X.T, d_out)
         self.B.grad = np.dot(np.ones((self.X.shape[0], 1)).T, d_out)
+        self.W.grad = np.dot(self.X.T, d_out)
 
         # Calculate X gradients
         d_input = np.dot(d_out, self.W.value.T)

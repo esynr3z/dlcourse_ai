@@ -22,7 +22,6 @@ class TwoLayerNet:
         self.layers.append(FullyConnectedLayer(n_input, hidden_layer_size))
         self.layers.append(ReLULayer())
         self.layers.append(FullyConnectedLayer(hidden_layer_size, n_output))
-        self.layers.append(ReLULayer())
 
     def compute_loss_and_gradients(self, X, y):
         """
