@@ -181,11 +181,8 @@ class FullyConnectedLayer:
         # TODO: Implement forward pass
         # Your final implementation shouldn't have any loops
         self.X = X.copy()
-        # Move B array inside W and expand X
-        X_expanded = np.hstack([X, np.ones((X.shape[0], 1))])
-        W_expanded = np.vstack([self.W.value, self.B.value])
 
-        l_result = np.dot(X_expanded, W_expanded)
+        l_result = np.dot(X, self.W.value) + self.B.value
 
         return l_result
 
@@ -211,17 +208,12 @@ class FullyConnectedLayer:
         # It should be pretty similar to linear classifier from
         # the previous assignment
 
-        # Move B array inside W and expand X
-        X_expanded = np.hstack([self.X, np.ones((self.X.shape[0], 1))])
-        W_expanded = np.vstack([self.W.value, self.B.value])
-
         # Calculate W and B gradients
-        W_expanded_grad = np.dot(X_expanded.T, d_out)
-        [self.W.grad, self.B.grad] = np.vsplit(W_expanded_grad, (self.W.value.shape[0],))
+        self.W.grad = np.dot(self.X.T, d_out)
+        self.B.grad = np.dot(np.ones((self.X.shape[0], 1)).T, d_out)
 
         # Calculate X gradients
-        X_expanded_grad = np.dot(d_out, W_expanded.T)
-        d_input = np.hsplit(X_expanded_grad, (self.X.shape[-1],))[0]
+        d_input = np.dot(d_out, self.W.value.T)
 
         return d_input
 
