@@ -34,7 +34,7 @@ class ConvNet:
         pool_size = 4
         stride = pool_size
         padding = 1
-        fc_input = (image_height // (2 * pool_size)) * (image_width // (2 * pool_size)) // conv2_channels
+        fc_input = (image_height // (pool_size ** 2)) * (image_width // (pool_size ** 2)) * conv2_channels
 
         self.layers.append(ConvolutionalLayer(n_channels, conv1_channels, filter_size, padding))
         self.layers.append(ReLULayer())
